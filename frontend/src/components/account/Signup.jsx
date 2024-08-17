@@ -7,34 +7,36 @@ import 'react-toastify/dist/ReactToastify.css';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 
-
-export default function Login() {
+export default function Signup() {
     const navigate = useNavigate();
+    const [fullname, setFullName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [emailError, setEmailError] = useState(false);
-    console.log(email, password);
+    const [passwordError, setPasswordError] = useState(false);
 
-    const signInUser = async () => {
-        axios.post('http://localhost:3000/user/signin', { email, password })
-             .then(res=>{
-                let user = JSON.stringify(res.data);
-                console.log(user);
-                console.log(res.data.message);
-                createNotification(res.data.message);
-             }).catch(error => {
-                console.log(error);
-                const message = error.response && error.response.data && error.response.data.message
-                    ? error.response.data.message
-                    : 'Something went wrong. Please try again later...';
-                createNotification(message);
+    const signUpUser = async () => {
+        try {
+            const res = await axios.post('http://localhost:3000/user/signup', { fullname, email, password });
+            console.log(JSON.stringify(res.data));
+            createNotification(res.data.message);
+            setEmailError(false);
+        } catch (error) {
+            console.log(error);
+            const message = error.response && error.response.data && error.response.data.message
+                ? error.response.data.message
+                : 'Something went wrong. Please try again later...';
+            createNotification(message);
+
+            if(message==='Email already exists.'){
+                setEmailError(true);
+            }
+            else if(message==='Password has minimum 8 characters.'){
+                setPasswordError(true);
+            }
+        }
+    };
     
-                if(message==='This email is not registered.'){
-                    setEmailError(true);
-                }
-                
-            })
-    }
 
     const createNotification = (type) => {
         switch (type) {
@@ -47,11 +49,8 @@ export default function Login() {
             case 'Email already exists.':
                 toast.error('Email already exists.');
                 break;
-            case 'This email is not registered.':
-                toast.error('This email is not registered.');
-                break;
-            case 'User successfully logged in.':
-                toast.success('User successfully logged in.');
+            case 'Password has minimum 8 characters.':
+                toast.error('Password has minimum 8 characters.');
                 break;
             default:
                 toast.info(type);  // If the response message isn't error or success, show it as info.
@@ -59,15 +58,15 @@ export default function Login() {
         }
     };
 
-    return (
-        <>
+  return (
+    <>
             <Box style={{ height: '100vh', display: 'flex', alignItems: 'center' }}>
                 <Components>
                     <Image src={AppLogo} alt='App Logo' />
                     <Typography style={{ textAlign: 'center' }}>" Welcome to our Ultimate Blogging Hub " </Typography>
                     <Typography style={{ textAlign: 'center' }}>  Share Your Stories, Ideas, and Creativity!</Typography>
-
                         <Wrapper>
+                            <TextField variant="standard" onChange={(e) => setFullName(e.target.value)} name='fullname' label="Enter full name" />
                             <TextField variant="standard" 
                             onChange={
                                 (e) => {setEmail(e.target.value);
@@ -78,18 +77,27 @@ export default function Login() {
                                 input: { 
                                     color: emailError ? 'red' : 'inherit'
                                 }
+                            }} name='email' label="Enter email" />
+                            <TextField variant="standard" 
+                            onChange={
+                                (e) => {setPassword(e.target.value);
+                                setPasswordError(false);
                             }} 
-                            label="Enter email" />
-                            <TextField variant="standard" onChange={(e) => setPassword(e.target.value)} label="Enter password" />
-                            <LoginButton variant="contained" onClick={() => { signInUser() }}>Login</LoginButton>
+                            error={passwordError}
+                            sx={{ 
+                                input: { 
+                                    color: passwordError ? 'red' : 'inherit'
+                                }
+                            }} name='password' label="Enter password" />
+                            <LoginButton variant="contained" onClick={() => { signUpUser() }}>signUp</LoginButton>
                             <Text style={{ textAlign: 'center' }}>OR</Text>
-                            <Box style={{ textAlign: 'center', marginTop: 0 }}>You don't have an account? <Button variant="text" onClick={()=>navigate('/signup')}>signUp</Button></Box>
-                        </Wrapper> 
+                            <Box style={{ textAlign: 'center', marginTop: 0 }}>You don't have an account? <Button variant="text" onClick={()=>navigate('/signin')}>signIn</Button></Box>
+                        </Wrapper>
                     <ToastContainer />
                 </Components>
             </Box>
         </>
-    )
+  )
 }
 
 const Components = styled(Box)`
