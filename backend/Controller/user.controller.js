@@ -1,6 +1,11 @@
 import { validationResult } from "express-validator";
 import UserModel from "../Model/user.model.js";
 import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
+import dotenv from "dotenv";
+import tokenModel from "../Model/token.js";
+
+dotenv.config();
 
 export const createUser = async (req, res) => {
     try {
@@ -10,6 +15,7 @@ export const createUser = async (req, res) => {
         // Validate request
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
+            console.log(errors);
             if (password.length < 8) {
                 console.log('Password has minimum 8 characters.')
                 return res.status(422).json({ message: "Password has minimum 8 characters." });
@@ -26,6 +32,7 @@ export const createUser = async (req, res) => {
             let result = await UserModel.create({ username, email, password: hashedPassword });
             return res.status(200).json({ message: "User successfully registered.", result });
         } catch (error) {
+            console.log(error);
             if (error.keyPattern.username) {
                 console.log("Username already exists.");
                 return res.status(400).json({ message: "Username already exists." });
@@ -65,15 +72,28 @@ export const findUser = async (req, res) => {
             return res.status(404).json({ message: "This email is not registered." });
         }
 
-        // Check if the password is correct
-        const isMatch = await bcrypt.compare(password, user.password);
-        console.log(isMatch);
+        try{
+            const isMatch = await bcrypt.compare(password, user.password);
+            console.log(isMatch);
         
-        if (!isMatch) {
-            return res.status(401).json({ message: "Invalid credentials." });
-        }
+            if(isMatch){
+                const accessToken = jwt.sign(user.toJSON(), process.env.ACCESS_SECRET_KEY, { expiresIn : '15m'});
+                const refreshToken = jwt.sign(user.toJSON(), process.env.REFRESH_SECRET_KEY);
 
-        return res.status(200).json({ message: "User successfully logged in.", user });
+                const newToken = new tokenModel({token : refreshToken});
+                await newToken.save();
+                // Check if the password is correct
+                return res.status(200).json({accessToken : accessToken, refreshToken : refreshToken, user_id : user._id, username : user.username, email : user.email, message: "User successfully logged in."});
+            }
+            else {
+                return res.status(401).json({ message: "Invalid credentials." });
+            }
+        }
+        catch(err){
+            console.log(err);
+            return res.status(500).json({ message: "Internal server error." });
+        }
+        
     } catch (err) {
         console.log(err);
         return res.status(500).json({ message: "Internal server error." });

@@ -21,7 +21,16 @@ export default function Signup() {
             const res = await axios.post('http://localhost:3000/user/signup', { username, email, password });
             console.log(JSON.stringify(res.data));
             createNotification(res.data.message);
-            setEmailError(false);
+            
+            if (res.data.message === 'User successfully registered.') {
+                setUserName("");
+                setEmail("");
+                setPassword("");
+                setUsernameError(false);
+                setEmailError(false);
+                setPasswordError(false);
+                // navigate('/signin');
+            }
         } catch (error) {
             console.log(error);
             const message = error.response && error.response.data && error.response.data.message
@@ -29,18 +38,15 @@ export default function Signup() {
                 : 'Something went wrong. Please try again later...';
             createNotification(message);
 
-            if(message==='Email already exists.'){
+            if (message === 'Email already exists.') {
                 setEmailError(true);
-            }
-            else if(message==='Password has minimum 8 characters.'){
+            } else if (message === 'Password has minimum 8 characters.') {
                 setPasswordError(true);
-            }
-            else if(message==='Username already exists.'){
+            } else if (message === 'Username already exists.') {
                 setUsernameError(true);
             }
         }
     };
-    
 
     const createNotification = (type) => {
         switch (type) {
@@ -65,56 +71,64 @@ export default function Signup() {
         }
     };
 
-  return (
-    <>
+    return (
+        <>
             <Box style={{ height: '100vh', display: 'flex', alignItems: 'center' }}>
                 <Components>
                     <Image src={AppLogo} alt='App Logo' />
                     <Typography style={{ textAlign: 'center' }}>" Welcome to our Ultimate Blogging Hub " </Typography>
                     <Typography style={{ textAlign: 'center' }}>  Share Your Stories, Ideas, and Creativity!</Typography>
-                        <Wrapper>
-                            <TextField variant="standard" 
-                            onChange={
-                                (e) => {setUserName(e.target.value);
-                                setUsernameError(false);
-                            }} 
+                    <Wrapper>
+                        <TextField 
+                            variant="standard"
+                            value={username} 
+                            onChange={(e) => { setUserName(e.target.value); setUsernameError(false); }} 
                             error={usernameError}
                             sx={{ 
                                 input: { 
                                     color: usernameError ? 'red' : 'inherit'
                                 }
-                            }} name='username' label="Enter username" />
-                            <TextField variant="standard" 
-                            onChange={
-                                (e) => {setEmail(e.target.value);
-                                setEmailError(false);
                             }} 
+                            name='username' 
+                            label="Enter username" 
+                        />
+                        <TextField 
+                            variant="standard" 
+                            value={email} 
+                            onChange={(e) => { setEmail(e.target.value); setEmailError(false); }} 
                             error={emailError}
                             sx={{ 
                                 input: { 
                                     color: emailError ? 'red' : 'inherit'
                                 }
-                            }} name='email' label="Enter email" />
-                            <TextField variant="standard" 
-                            onChange={
-                                (e) => {setPassword(e.target.value);
-                                setPasswordError(false);
                             }} 
+                            name='email' 
+                            label="Enter email" 
+                        />
+                        <TextField 
+                            variant="standard" 
+                            value={password} 
+                            onChange={(e) => { setPassword(e.target.value); setPasswordError(false); }} 
                             error={passwordError}
                             sx={{ 
                                 input: { 
                                     color: passwordError ? 'red' : 'inherit'
                                 }
-                            }} name='password' label="Enter password" />
-                            <LoginButton variant="contained" onClick={() => { signUpUser() }}>signUp</LoginButton>
-                            <Text style={{ textAlign: 'center' }}>OR</Text>
-                            <Box style={{ textAlign: 'center', marginTop: 0 }}>You don't have an account? <Button variant="text" onClick={()=>navigate('/signin')}>signIn</Button></Box>
-                        </Wrapper>
+                            }} 
+                            name='password' 
+                            label="Enter password" 
+                        />
+                        <LoginButton variant="contained" 
+                        onClick={() => { signUpUser(); navigate('/signin');}}>
+                        signUp</LoginButton>
+                        <Text style={{ textAlign: 'center' }}>OR</Text>
+                        <Box style={{ textAlign: 'center', marginTop: 0 }}>You don't have an account? <Button variant="text" onClick={() => navigate('/signin')}>signIn</Button></Box>
+                    </Wrapper>
                     <ToastContainer />
                 </Components>
             </Box>
         </>
-  )
+    );
 }
 
 const Components = styled(Box)`
@@ -128,7 +142,7 @@ const Image = styled('img')({
     display: 'flex',
     margin: 'auto',
     padding: '50px 0 0'
-})
+});
 
 const Wrapper = styled(Box)`
     padding: 25px 35px;

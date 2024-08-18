@@ -5,7 +5,9 @@ import axios from 'axios';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useNavigate } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, useContext } from 'react';
+import { DataContext } from '../../context/DataProvider';
+
 
 
 export default function Login() {
@@ -14,14 +16,16 @@ export default function Login() {
     const [password, setPassword] = useState("");
     const [emailError, setEmailError] = useState(false);
     const [passwordError, setPasswordError] = useState(false);
+    const {setAccount} = useContext(DataContext);
     console.log(email, password);
 
     const signInUser = async () => {
         axios.post('http://localhost:3000/user/signin', { email, password })
              .then(res=>{
                 let user = JSON.stringify(res.data);
-                console.log(user);
-                console.log(res.data.message);
+                sessionStorage.setItem('accessToken', `Bearer ${res.data.accessToken}`);
+                sessionStorage.setItem('refreshToken', `Bearer ${res.data.refreshToken}`);
+                setAccount({username : res.data.username, email : res.data.email});
                 createNotification(res.data.message);
              }).catch(error => {
                 console.log(error);
@@ -36,7 +40,6 @@ export default function Login() {
                 else if(message==='Invalid credentials.'){
                     setPasswordError(true);
                 }
-                
             })
     }
 
