@@ -13,6 +13,7 @@ export default function Login() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [emailError, setEmailError] = useState(false);
+    const [passwordError, setPasswordError] = useState(false);
     console.log(email, password);
 
     const signInUser = async () => {
@@ -32,6 +33,9 @@ export default function Login() {
                 if(message==='This email is not registered.'){
                     setEmailError(true);
                 }
+                else if(message==='Invalid credentials.'){
+                    setPasswordError(true);
+                }
                 
             })
     }
@@ -44,17 +48,11 @@ export default function Login() {
             case 'User successfully registered.':
                 toast.success('User successfully registered.');
                 break;
-            case 'Email already exists.':
-                toast.error('Email already exists.');
-                break;
-            case 'This email is not registered.':
-                toast.error('This email is not registered.');
-                break;
             case 'User successfully logged in.':
                 toast.success('User successfully logged in.');
                 break;
             default:
-                toast.info(type);  // If the response message isn't error or success, show it as info.
+                toast.error(type);  // If the response message isn't error or success, show it as info.
                 break;
         }
     };
@@ -80,7 +78,17 @@ export default function Login() {
                                 }
                             }} 
                             label="Enter email" />
-                            <TextField variant="standard" onChange={(e) => setPassword(e.target.value)} label="Enter password" />
+                            <TextField variant="standard" 
+                            onChange={
+                                (e) => {setPassword(e.target.value);
+                                setPasswordError(false);
+                            }} 
+                            error={passwordError}
+                            sx={{ 
+                                input: { 
+                                    color: passwordError ? 'red' : 'inherit'
+                                }
+                            }}  label="Enter password" />
                             <LoginButton variant="contained" onClick={() => { signInUser() }}>Login</LoginButton>
                             <Text style={{ textAlign: 'center' }}>OR</Text>
                             <Box style={{ textAlign: 'center', marginTop: 0 }}>You don't have an account? <Button variant="text" onClick={()=>navigate('/signup')}>signUp</Button></Box>

@@ -9,15 +9,16 @@ import { useState } from 'react';
 
 export default function Signup() {
     const navigate = useNavigate();
-    const [fullname, setFullName] = useState("");
+    const [username, setUserName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [usernameError, setUsernameError] = useState(false);
     const [emailError, setEmailError] = useState(false);
     const [passwordError, setPasswordError] = useState(false);
 
     const signUpUser = async () => {
         try {
-            const res = await axios.post('http://localhost:3000/user/signup', { fullname, email, password });
+            const res = await axios.post('http://localhost:3000/user/signup', { username, email, password });
             console.log(JSON.stringify(res.data));
             createNotification(res.data.message);
             setEmailError(false);
@@ -33,6 +34,9 @@ export default function Signup() {
             }
             else if(message==='Password has minimum 8 characters.'){
                 setPasswordError(true);
+            }
+            else if(message==='Username already exists.'){
+                setUsernameError(true);
             }
         }
     };
@@ -52,6 +56,9 @@ export default function Signup() {
             case 'Password has minimum 8 characters.':
                 toast.error('Password has minimum 8 characters.');
                 break;
+            case 'Username already exists.':
+                toast.error('Username already exists.');
+                break;
             default:
                 toast.info(type);  // If the response message isn't error or success, show it as info.
                 break;
@@ -66,7 +73,17 @@ export default function Signup() {
                     <Typography style={{ textAlign: 'center' }}>" Welcome to our Ultimate Blogging Hub " </Typography>
                     <Typography style={{ textAlign: 'center' }}>  Share Your Stories, Ideas, and Creativity!</Typography>
                         <Wrapper>
-                            <TextField variant="standard" onChange={(e) => setFullName(e.target.value)} name='fullname' label="Enter full name" />
+                            <TextField variant="standard" 
+                            onChange={
+                                (e) => {setUserName(e.target.value);
+                                setUsernameError(false);
+                            }} 
+                            error={usernameError}
+                            sx={{ 
+                                input: { 
+                                    color: usernameError ? 'red' : 'inherit'
+                                }
+                            }} name='username' label="Enter username" />
                             <TextField variant="standard" 
                             onChange={
                                 (e) => {setEmail(e.target.value);

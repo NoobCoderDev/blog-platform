@@ -5,7 +5,7 @@ const userRouter = express.Router();
 import { createUser, findUser } from '../Controller/user.controller.js';
 
 userRouter.post('/signup',
-body("fullname","fullname is required").notEmpty(),
+body("username","username is required").notEmpty(),
 body("email","email is required").notEmpty(),
 body("email","email is incorrect").isEmail(),
 body("password","password is required").notEmpty(),

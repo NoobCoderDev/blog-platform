@@ -3,8 +3,9 @@ import mongoose from "mongoose";
 
 // Defining Schema 
 const UserSchema = new mongoose.Schema({
-    fullname:{
+    username:{
         type : String,
+        unique : true,
         required : true,
         trim : true,
     },
