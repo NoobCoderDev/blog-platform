@@ -31,6 +31,11 @@ export default function Signup() {
                 setPasswordError(false);
                 // navigate('/signin');
             }
+
+            setTimeout(() => {
+                navigate('/signin');
+            }, 1000);
+
         } catch (error) {
             console.log(error);
             const message = error.response && error.response.data && error.response.data.message
@@ -119,7 +124,7 @@ export default function Signup() {
                             label="Enter password" 
                         />
                         <LoginButton variant="contained" 
-                        onClick={() => { signUpUser(); navigate('/signin');}}>
+                        onClick={() => { signUpUser()}}>
                         signUp</LoginButton>
                         <Text style={{ textAlign: 'center' }}>OR</Text>
                         <Box style={{ textAlign: 'center', marginTop: 0 }}>You don't have an account? <Button variant="text" onClick={() => navigate('/signin')}>signIn</Button></Box>

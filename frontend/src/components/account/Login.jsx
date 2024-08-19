@@ -10,7 +10,7 @@ import { DataContext } from '../../context/DataProvider';
 
 
 
-export default function Login() {
+export default function Login({isUserAuthenticated}) {
     const navigate = useNavigate();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -22,11 +22,15 @@ export default function Login() {
     const signInUser = async () => {
         axios.post('http://localhost:3000/user/signin', { email, password })
              .then(res=>{
-                let user = JSON.stringify(res.data);
+                JSON.stringify(res.data);
                 sessionStorage.setItem('accessToken', `Bearer ${res.data.accessToken}`);
                 sessionStorage.setItem('refreshToken', `Bearer ${res.data.refreshToken}`);
                 setAccount({username : res.data.username, email : res.data.email});
                 createNotification(res.data.message);
+                isUserAuthenticated(true);
+                setTimeout(() => {
+                    navigate('/home');
+                }, 1000);
              }).catch(error => {
                 console.log(error);
                 const message = error.response && error.response.data && error.response.data.message
@@ -92,7 +96,8 @@ export default function Login() {
                                     color: passwordError ? 'red' : 'inherit'
                                 }
                             }}  label="Enter password" />
-                            <LoginButton variant="contained" onClick={() => { signInUser() }}>Login</LoginButton>
+                            <LoginButton variant="contained" 
+                            onClick={() => { signInUser()}}>Login</LoginButton>
                             <Text style={{ textAlign: 'center' }}>OR</Text>
                             <Box style={{ textAlign: 'center', marginTop: 0 }}>You don't have an account? <Button variant="text" onClick={()=>navigate('/signup')}>signUp</Button></Box>
                         </Wrapper> 
